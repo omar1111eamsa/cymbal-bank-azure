@@ -2,6 +2,24 @@ resource "tfe_project" "azure" {
   name = "cymbal-bank-azure"
 }
 
+# Holds this stack's own state. Not in local.layers on purpose: no OIDC identity,
+# bootstrap creates identities and roles, so it runs only with your own rights
+resource "tfe_workspace" "bootstrap" {
+  name       = "cymbal-bank-azure-bootstrap"
+  project_id = tfe_project.azure.id
+
+  # Deleting it would delete the bootstrap state with it
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# Local execution: HCP only stores the state, plan/apply run on your laptop
+resource "tfe_workspace_settings" "bootstrap" {
+  workspace_id   = tfe_workspace.bootstrap.id
+  execution_mode = "local"
+}
+
 resource "tfe_workspace" "layer" {
   for_each   = local.layers
   name       = "cymbal-bank-azure-${each.key}"

@@ -14,4 +14,12 @@ terraform {
     }
   }
   required_version = "~> 1.17"
+
+  cloud {
+    organization = "cymbal-bank-org"
+    workspaces {
+      name    = "cymbal-bank-azure-bootstrap"
+      project = "cymbal-bank-azure"
+    }
+  }
 }
