@@ -12,3 +12,10 @@ variable "region" {
   type    = string
   default = "francecentral"
 }
+
+variable "cloudflare_api_token" {
+  sensitive   = true
+  ephemeral   = true
+  description = "Cloudflare API token, DNS edit on assfah.me only."
+  type = string
+}

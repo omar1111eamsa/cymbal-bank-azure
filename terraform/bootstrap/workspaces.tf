@@ -62,3 +62,18 @@ resource "tfe_variable" "arm_tenant_id" {
   key          = "ARM_TENANT_ID"
   value        = var.tenant_id
 }
+
+resource "tfe_variable" "cloudflare_api_token" {
+
+  workspace_id = tfe_workspace.layer["ephemeral"].id
+  category     = "env"
+  sensitive    = true
+  key          = "CLOUDFLARE_API_TOKEN"
+  value_wo     = var.cloudflare_api_token
+}
+
+
+moved {
+  from = tfe_variable.cloudeflare_api_token
+  to = tfe_variable.cloudflare_api_token
+}
