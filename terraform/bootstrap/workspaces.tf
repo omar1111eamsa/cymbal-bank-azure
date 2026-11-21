@@ -64,12 +64,17 @@ resource "tfe_variable" "arm_tenant_id" {
 }
 
 resource "tfe_variable" "cloudflare_api_token" {
-
   workspace_id = tfe_workspace.layer["ephemeral"].id
   category     = "env"
   sensitive    = true
   key          = "CLOUDFLARE_API_TOKEN"
   value_wo     = var.cloudflare_api_token
+
+  # Bootstrap must run without the token: keep version 1 from state, never resend.
+  # Rotate: export the new token, then apply -replace=tfe_variable.cloudflare_api_token
+  lifecycle {
+    ignore_changes = [value_wo_version]
+  }
 }
 
 
