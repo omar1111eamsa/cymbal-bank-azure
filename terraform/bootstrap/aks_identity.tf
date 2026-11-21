@@ -9,3 +9,9 @@ resource "azurerm_role_assignment" "aks_network" {
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_user_assigned_identity.aks.principal_id
 }
+
+resource "azurerm_role_assignment" "ephemeral_identity_operator" {
+  scope                = azurerm_user_assigned_identity.aks.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azuread_service_principal.hcp["ephemeral"].object_id
+}
