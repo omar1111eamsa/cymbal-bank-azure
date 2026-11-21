@@ -10,7 +10,7 @@ variable "tenant_id" {
 
 variable "region" {
   type    = string
-  default = "francecentral"
+  default = "swedencentral"
 }
 
 variable "cloudflare_api_token" {
