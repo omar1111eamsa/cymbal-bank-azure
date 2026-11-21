@@ -15,3 +15,9 @@ resource "azurerm_role_assignment" "ephemeral_identity_operator" {
   role_definition_name = "Managed Identity Operator"
   principal_id         = azuread_service_principal.hcp["ephemeral"].object_id
 }
+
+resource "azurerm_role_assignment" "aks_admin_me" {
+  scope                = azurerm_resource_group.rg["ephemeral"].id
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = data.azuread_client_config.current.object_id
+}
