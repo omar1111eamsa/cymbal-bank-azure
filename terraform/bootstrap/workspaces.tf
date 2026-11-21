@@ -75,5 +75,5 @@ resource "tfe_variable" "cloudflare_api_token" {
 
 moved {
   from = tfe_variable.cloudeflare_api_token
-  to = tfe_variable.cloudflare_api_token
+  to   = tfe_variable.cloudflare_api_token
 }
