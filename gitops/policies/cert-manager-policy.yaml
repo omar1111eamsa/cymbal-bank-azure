@@ -31,11 +31,22 @@ metadata:
   name: cert-manager-controller
   namespace: cert-manager
 spec:
-  description: "cert-manager controller: HTTPS out to the Let's Encrypt ACME API"
+  description: "cert-manager controller: ACME API (443) + HTTP-01 self-check through our gateway (80)"
   endpointSelector:
     matchLabels:
       app.kubernetes.io/component: controller
   egress:
+    # HTTP-01 self-check: the controller GETs http://<domain>/.well-known/... itself
+    # before asking Let's Encrypt. Cilium translates our LB IP to the gateway pod
+    # inside the cluster, so allow the gateway pod (not "world") on port 80.
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": istio-ingress
+            gateway.networking.k8s.io/gateway-name: bank-gateway
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
     - toEntities:
         - world
       toPorts:
