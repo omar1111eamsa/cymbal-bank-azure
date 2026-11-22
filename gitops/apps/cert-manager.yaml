@@ -15,6 +15,13 @@ spec:
         crds:
           enabled: true
           keep: true
+        # Watch Gateway API resources: HTTP-01 challenges via a temporary HTTPRoute
+        # on our Istio gateway (off by default)
+        config:
+          apiVersion: controller.config.cert-manager.io/v1alpha1
+          kind: ControllerConfiguration
+          gatewayAPI:
+            enabled: true
         replicaCount: 1
         resources:
           requests:

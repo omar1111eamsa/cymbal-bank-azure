@@ -1,6 +1,7 @@
 # AKS notes:
 # - Managed Cilium runs without the L7 proxy (L7/FQDN rules need ACNS), so these
 #   policies are L3/L4 only: DNS is allowed by port, not by name.
+# - No toFQDNs either, so the controller gets HTTPS to "world" (Let's Encrypt ACME API).
 # - The API server lives outside the VNet and reaches pods through the
 #   konnectivity-agent pods in kube-system, not as the kube-apiserver entity.
 apiVersion: "cilium.io/v2"
@@ -23,6 +24,24 @@ spec:
               protocol: ANY
     - toEntities:
         - kube-apiserver
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: cert-manager-controller
+  namespace: cert-manager
+spec:
+  description: "cert-manager controller: HTTPS out to the Let's Encrypt ACME API"
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
