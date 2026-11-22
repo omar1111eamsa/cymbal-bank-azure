@@ -15,6 +15,15 @@ spec:
   destination:
     server: "https://kubernetes.default.svc"
     namespace: istio-system
+  # istiod flips failurePolicy Ignore -> Fail once its webhook is ready, and the
+  # AKS Admissions Enforcer adds 2 namespaceSelector rules to every webhook.
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      name: istiod-default-validator
+      jqPathExpressions:
+        - .webhooks[]?.failurePolicy
+        - '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane" or .key == "kubernetes.azure.com/managedby")'
   syncPolicy:
     automated:
       prune: true
@@ -28,6 +37,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true # don't overwrite the ignored fields on sync
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -54,7 +64,8 @@ spec:
   destination:
     server: "https://kubernetes.default.svc"
     namespace: istio-system
-  # istiod patches its own validating webhook at runtime (CA bundle, failurePolicy)
+  # istiod patches its own validating webhook at runtime (CA bundle, failurePolicy).
+  # AKS Admissions Enforcer adds 2 namespaceSelector rules to every webhook.
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: ValidatingWebhookConfiguration
@@ -62,6 +73,12 @@ spec:
       jqPathExpressions:
         - .webhooks[]?.clientConfig.caBundle
         - .webhooks[]?.failurePolicy
+        - '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane" or .key == "kubernetes.azure.com/managedby")'
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      name: istio-sidecar-injector
+      jqPathExpressions:
+        - '.webhooks[].namespaceSelector.matchExpressions[] | select(.key == "control-plane" or .key == "kubernetes.azure.com/managedby")'
   syncPolicy:
     automated:
       prune: true
