@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cymbal-bank
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/omar1111eamsa/cymbal-bank-azure.git"
+    targetRevision: main
+    path: gitops/cymbal-bank
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: cymbal-bank
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+    # The namespace and its security labels live in gitops/policies (platform-owned);
+    # until it exists, syncs fail and the retry above waits for it

@@ -1,0 +1,21 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: loadgenerator-egress
+  namespace: cymbal-bank
+spec:
+  description: "Allow loadgenerator to call the frontend"
+  endpointSelector:
+    matchLabels:
+      app: loadgenerator
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: frontend
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+            # Istio Ambient: mesh traffic leaves through the ztunnel HBONE tunnel
+            - port: "15008"
+              protocol: TCP
