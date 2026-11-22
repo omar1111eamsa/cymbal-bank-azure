@@ -48,6 +48,7 @@ resource "azurerm_network_security_group" "aks_nodes" {
   location            = data.azurerm_resource_group.ephemeral.location
   resource_group_name = data.azurerm_resource_group.ephemeral.name
   tags                = local.tags
+  depends_on = [ azurerm_subnet_nat_gateway_association.aks_nodes ]
 }
 
 resource "azurerm_subnet_network_security_group_association" "aks_nodes" {
