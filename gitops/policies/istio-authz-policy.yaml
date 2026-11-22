@@ -54,7 +54,7 @@ spec:
         - operation:
             ports: ["5432"]
 ---
-# frontend: the loadgenerator (the Istio ingress gateway is added with the ingress step)
+# frontend: the Istio ingress gateway (internet traffic) and the loadgenerator
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
@@ -69,6 +69,7 @@ spec:
     - from:
         - source:
             principals:
+              - cluster.local/ns/istio-ingress/sa/bank-gateway-istio
               - cluster.local/ns/cymbal-bank/sa/loadgenerator
       to:
         - operation:

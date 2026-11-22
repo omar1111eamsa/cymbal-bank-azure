@@ -1,15 +1,25 @@
-# The ALB rule from AWS is gone: the Istio ingress gateway rule comes with the ingress step.
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
 metadata:
   name: frontend-ingress
   namespace: cymbal-bank
 spec:
-  description: "Allow the loadgenerator to reach the frontend"
+  description: "Allow the Istio ingress gateway and the loadgenerator to reach the frontend"
   endpointSelector:
     matchLabels:
       app: frontend
   ingress:
+    # Istio ingress gateway (internet traffic): plain :8080 or HBONE :15008
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": istio-ingress
+            gateway.networking.k8s.io/gateway-name: bank-gateway
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+            - port: "15008"
+              protocol: TCP
     - fromEndpoints:
         - matchLabels:
             app: loadgenerator

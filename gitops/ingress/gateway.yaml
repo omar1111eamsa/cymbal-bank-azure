@@ -1,0 +1,34 @@
+# Internet entry point, owned by the platform. Its own namespace keeps the
+# internet-facing Envoy away from the app.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-ingress
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+---
+# Istio deploys an Envoy + a LoadBalancer Service for this Gateway. The annotations
+# below are copied onto that Service: AKS adopts the static IP made by Terraform.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: bank-gateway
+  namespace: istio-ingress
+spec:
+  gatewayClassName: istio
+  infrastructure:
+    annotations:
+      service.beta.kubernetes.io/azure-pip-name: pip-ingress-cymbal-bank
+      service.beta.kubernetes.io/azure-load-balancer-resource-group: rg-cymbal-bank-ephemeral
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: bank.az.assfah.me
+      # Only the bank namespace may publish routes on this gateway
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: cymbal-bank
