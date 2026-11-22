@@ -1,6 +1,3 @@
-# One-time: adopt the identity an interrupted apply created. Delete after apply.
-
-
 resource "azurerm_user_assigned_identity" "aks" {
   name                = "id-aks-cymbal-bank"
   resource_group_name = azurerm_resource_group.rg["persistent"].name

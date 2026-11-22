@@ -15,3 +15,9 @@ output "workspaces" {
   description = "HCP Terraform workspace of each layer"
   value       = { for layer, ws in tfe_workspace.layer : layer => ws.name }
 }
+
+# Goes in the ESO ServiceAccount annotation (azure.workload.identity/client-id)
+output "eso_client_id" {
+  description = "Client ID of the External Secrets Operator identity"
+  value       = azurerm_user_assigned_identity.eso.client_id
+}
