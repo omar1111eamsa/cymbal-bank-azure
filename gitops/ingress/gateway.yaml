@@ -20,6 +20,14 @@ spec:
     annotations:
       service.beta.kubernetes.io/azure-pip-name: pip-ingress-cymbal-bank
       service.beta.kubernetes.io/azure-load-balancer-resource-group: rg-cymbal-bank-ephemeral
+      # Istio marks port 80 appProtocol=http, so AKS probes "GET /" with no Host header:
+      # no route matches -> 404 -> LB thinks every node is down. Probe Envoy's
+      # readiness endpoint instead (status port 15021, mapped to its nodePort).
+      service.beta.kubernetes.io/port_80_health-probe_protocol: http
+      service.beta.kubernetes.io/port_80_health-probe_port: "15021"
+      service.beta.kubernetes.io/port_80_health-probe_request-path: /healthz/ready
+      # Status port is for probes only: no public LB rule for it
+      service.beta.kubernetes.io/port_15021_no_lb_rule: "true"
   listeners:
     - name: http
       protocol: HTTP
