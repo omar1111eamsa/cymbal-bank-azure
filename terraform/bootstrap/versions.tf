@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/tfe"
       version = "~> 0.84.0"
     }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.13"
+    }
   }
   required_version = "~> 1.17"
 

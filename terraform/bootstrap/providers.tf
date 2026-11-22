@@ -11,3 +11,7 @@ provider "azuread" {
 provider "tfe" {
   organization = "cymbal-bank-org"
 }
+
+provider "github" {
+  owner = "omar1111eamsa"
+}
