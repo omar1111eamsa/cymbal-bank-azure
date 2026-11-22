@@ -1,0 +1,45 @@
+# AKS notes:
+# - Managed Cilium runs without the L7 proxy (L7/FQDN rules need ACNS), so these
+#   policies are L3/L4 only: DNS is allowed by port, not by name.
+# - The API server lives outside the VNet and reaches pods through the
+#   konnectivity-agent pods in kube-system, not as the kube-apiserver entity.
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: cert-manager-default
+  namespace: cert-manager
+spec:
+  description: "All cert-manager pods: no ingress; egress only to DNS and API server"
+  endpointSelector: {}
+  ingress: []
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            "k8s:k8s-app": kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    - toEntities:
+        - kube-apiserver
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: cert-manager-webhook
+  namespace: cert-manager
+spec:
+  description: "cert-manager webhook: allow calls from the API server (via konnectivity)"
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/component: webhook
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            app: konnectivity-agent
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
