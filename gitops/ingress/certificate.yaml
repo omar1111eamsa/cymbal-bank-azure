@@ -1,0 +1,14 @@
+# TLS cert for the bank. In the gateway's namespace: a Gateway reads its TLS Secret
+# from its own namespace without a ReferenceGrant. Renewed automatically at 2/3 of lifetime.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bank-tls
+  namespace: istio-ingress
+spec:
+  secretName: bank-tls
+  dnsNames:
+    - bank.az.assfah.me
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-staging # switch to letsencrypt-prod once staging works
