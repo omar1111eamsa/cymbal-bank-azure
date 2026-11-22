@@ -8,6 +8,7 @@ spec:
   parentRefs:
     - name: bank-gateway
       namespace: istio-ingress
+      sectionName: https # HTTPS only; plain HTTP is redirected by the platform
   hostnames:
     - bank.az.assfah.me
   rules:

@@ -11,4 +11,4 @@ spec:
     - bank.az.assfah.me
   issuerRef:
     kind: ClusterIssuer
-    name: letsencrypt-staging # switch to letsencrypt-prod once staging works
+    name: letsencrypt-prod # flow proven on letsencrypt-staging first

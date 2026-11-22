@@ -1,0 +1,20 @@
+# Plain HTTP -> HTTPS (301) for everything on the http listener.
+# ACME renewals keep working: cert-manager's challenge route matches the exact path
+# /.well-known/acme-challenge/<token>, which beats "/" (most specific match wins).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-to-https
+  namespace: istio-ingress
+spec:
+  parentRefs:
+    - name: bank-gateway
+      sectionName: http
+  hostnames:
+    - bank.az.assfah.me
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
