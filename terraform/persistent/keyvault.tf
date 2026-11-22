@@ -2,7 +2,7 @@ data "azurerm_client_config" "current" {}
 
 
 resource "azurerm_key_vault" "kv" {
-  name                       = "kv-cymbal-bank-os-frc"
+  name                       = "kv-cymbal-bank-os-swc"
   resource_group_name        = data.azurerm_resource_group.persistent.name
   location                   = data.azurerm_resource_group.persistent.location
   tenant_id                  = data.azurerm_client_config.current.tenant_id
