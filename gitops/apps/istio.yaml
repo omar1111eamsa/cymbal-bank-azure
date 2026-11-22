@@ -130,3 +130,40 @@ spec:
         maxDuration: 5m
     syncOptions:
       - ServerSideApply=true
+---
+# Per-node L4 proxy (DaemonSet): mTLS + L4 authz for every ambient pod on the node
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ztunnel
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "https://istio-release.storage.googleapis.com/charts"
+    chart: ztunnel
+    targetRevision: 1.30.7
+    helm:
+      releaseName: ztunnel
+      values: |
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+    syncOptions:
+      - ServerSideApply=true
