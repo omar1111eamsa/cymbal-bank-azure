@@ -1,0 +1,68 @@
+# Bootstrap GitOps: install Argo CD and the root app, then Argo deploys the rest
+# from gitops/apps. Runs in CI (not HCP) because the cluster only accepts
+# Entra tokens, and that needs kubelogin.
+name: argocd
+
+on:
+  workflow_dispatch:
+
+# Only one bootstrap at a time on the cluster
+concurrency:
+  group: argocd
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # request the GitHub OIDC token for azure/login
+  contents: read
+
+env:
+  RESOURCE_GROUP: rg-cymbal-bank-ephemeral
+  CLUSTER_NAME: aks-cymbal-bank
+  ARGOCD_CHART_VERSION: 10.10.5
+
+jobs:
+  argocd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # OIDC: no secret, Entra trusts only this repo on main
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: azure/use-kubelogin@0ce7c36141aa27d4934872cf00b0120804c98a29 # v1.3
+        with:
+          kubelogin-version: v0.2.22
+
+      - uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
+        with:
+          version: v4.3.2
+
+      # Local accounts are off: convert the kubeconfig to use the az login token
+      - name: Get kubeconfig
+        run: |
+          az aks get-credentials -g "$RESOURCE_GROUP" -n "$CLUSTER_NAME" --overwrite-existing
+          kubelogin convert-kubeconfig -l azurecli
+          kubectl get nodes
+
+      # upgrade --install: rerunning upgrades instead of failing
+      - name: Install Argo CD
+        run: |
+          helm upgrade --install argocd argo-cd \
+            --repo https://argoproj.github.io/argo-helm \
+            --version "$ARGOCD_CHART_VERSION" \
+            --namespace argocd --create-namespace \
+            -f gitops/bootstrap/argocd-values.yaml \
+            --wait --timeout 10m
+
+      - name: Apply root app
+        run: kubectl apply -f gitops/bootstrap/root-app.yaml
+
+      - name: Show applications
+        run: |
+          sleep 30
+          kubectl get applications -n argocd
