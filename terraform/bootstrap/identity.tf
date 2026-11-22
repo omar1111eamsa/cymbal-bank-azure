@@ -37,3 +37,5 @@ resource "azuread_application_federated_identity_credential" "hcp" {
   audiences      = ["api://AzureADTokenExchange"]
   subject        = "organization:${tfe_workspace.layer[each.value.layer].organization}:project:${tfe_project.azure.name}:workspace:${tfe_workspace.layer[each.value.layer].name}:run_phase:${each.value.phase}"
 }
+
+
