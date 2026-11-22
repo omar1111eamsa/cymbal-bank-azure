@@ -1,0 +1,9 @@
+# Default deny: every pod in the namespace refuses all mesh traffic,
+# unless an ALLOW policy opens it (zero trust by default).
+# Per-service ALLOW rules (by ServiceAccount identity) come with the bank app.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: cymbal-bank
+spec: {}
