@@ -1,0 +1,10 @@
+
+
+controller:
+  metrics: { enabled = true } 
+server: 
+  metrics: { enabled = true }
+repoServer: 
+  metrics:  { enabled = true } 
+applicationSet:
+  metrics: { enabled = true }
