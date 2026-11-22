@@ -93,3 +93,40 @@ spec:
       - ServerSideApply=true
       - SkipDryRunOnMissingResource=true
       - RespectIgnoreDifferences=true # don't overwrite the ignored fields on sync
+---
+# Node agent (DaemonSet): chains into AKS Cilium's CNI config (cni-exclusive=false)
+# and redirects mesh pod traffic to ztunnel
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-cni
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "https://istio-release.storage.googleapis.com/charts"
+    chart: cni
+    targetRevision: 1.30.7
+    helm:
+      releaseName: istio-cni
+      values: |
+        profile: ambient
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+    syncOptions:
+      - ServerSideApply=true
